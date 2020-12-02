@@ -143,10 +143,14 @@
     <ClCompile Include="free_functions.cpp" />
     <ClCompile Include="settling_down_test.cpp" />
     <ClCompile Include="particle.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="xy_work.cpp" />
     <ClCompile Include="sph_basic_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="free_functions.h" />
+    <ClInclude Include="tests.h" />
+    <ClInclude Include="xy_work.h" />
     <ClInclude Include="Particle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

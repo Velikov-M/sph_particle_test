@@ -5,11 +5,11 @@
 #include <math.h>
 #include <cmath>
 
-const double mass = 1.0; // mass of one particle, for now i am assuming be equal
-const double B = 0.001;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
+const double mass = 1; // mass of one particle, for now i am assuming be equal
+const double B = 0.01;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
 const double gamma = 7.0; //mb should think more about B and rho_0;
-const double rho_0 = 0.9;
-const double mu = 8.9 * 0.0001; // dynamic viscosity of water by 25C temperature
+const double rho_0 = 0.90;
+const double mu = 8.9 * 0.01; // dynamic viscosity of water by 25C temperature
 const double b = 10.0; // domain of interest
 const double g = 9.81; // gravity const
 
@@ -49,8 +49,8 @@ double calculate_density(std::vector<Particle>& particles, int id_part, int num)
 std::vector<std::vector<double>> calc_eulier_pres_tensor(std::vector<double>& densities, int id_part, int num) {
 	std::vector < std::vector<double>> pres_tensor(2);
 	double pressure = B * (pow(densities[id_part] / rho_0, gamma) - 1);
-	pres_tensor[0] = { pressure, 0 };
-	pres_tensor[1] = { 0, pressure };
+	pres_tensor[0] = { -pressure, 0 };
+	pres_tensor[1] = { 0, -pressure };
 	return pres_tensor;
 }
 

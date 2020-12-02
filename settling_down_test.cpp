@@ -6,14 +6,15 @@
 #include <cmath>
 #include "Particle.h"
 #include "free_functions.h"
+#include "xy_work.h"
 
 // for now i'll define some global variables, in "free_function.h", mb should be rewritten
-const double h = 0.1; // timestep
-const double N_timesteps = 10;
-const double mass = 1.0; //wtf, i declare this const two times, IF U WANT TO CHANGE BE SURE TO MAKE IT IN 2 PLACES, "free_function.h" AS WELL
+const double h = 0.001; // timestep
+const double N_timesteps = 100;
+const double mass = 1; //wtf, i declare this const two times, IF U WANT TO CHANGE BE SURE TO MAKE IT IN 2 PLACES, "free_function.h" AS WELL
 
 
-int settling_down_test() {
+void settling_down_test() {
 	bool is_gravity = true; // we apply gravity by axe y
 
 	// we'll create 48 border particles
@@ -42,6 +43,7 @@ int settling_down_test() {
 		}
 	}
 	std::vector<double> densities(n + 48);
+	create_XY(vector_of_particles, n + 48);
 
 	// Now, we are ready for an initial step
 	for (int i = 0; i < n + 48; i++) {
@@ -62,6 +64,8 @@ int settling_down_test() {
 		vector_of_particles[48 + i].set_position(prev_position[0] + cur_speed[0] * h, prev_position[1] + cur_speed[1] * h);
 	}
 
+	add_ts_XY(vector_of_particles, n + 48);
+
 	// now we are ready for main integration process
 	for (int i = 0; i < N_timesteps; i++) {
 		for (int j = 0; j < n + 48; j++) {
@@ -72,16 +76,15 @@ int settling_down_test() {
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_velosity = vector_of_particles[48 + j].get_velosity();
-			vector_of_particles[48 + j].set_velosity(prev_velosity[0] + h * vec_of_accs[j][0], prev_velosity[1] + h * vec_of_accs[j][1]); //It's euler hf-step integration, not a simplex, hoewer we preserve accumalated h^2 
+			vector_of_particles[48 + j].set_velosity(prev_velosity[0] + h * vec_of_accs[j][0], prev_velosity[1] + h * vec_of_accs[j][1]); 
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_position = vector_of_particles[48 + j].get_position();
 			std::vector<double> cur_speed = vector_of_particles[48 + j].get_velosity();
 			vector_of_particles[48 + j].set_position(prev_position[0] + h * cur_speed[0], prev_position[1] + h * cur_speed[1]);
 		}
+		add_ts_XY(vector_of_particles, n + 48);
 	}
 
 	std::cout << vector_of_particles[48].get_position()[0] << std::endl;
-	system("pause");
-	return 0;
 }
