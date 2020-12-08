@@ -9,7 +9,7 @@
 #include "xy_work.h"
 
 const double h = 0.01; // timestep
-const double N_timesteps = 100;
+const double N_timesteps = 500;
 const double mass = 1.0; //wtf, i declare this const two times, IF U WANT TO CHANGE BE SURE TO MAKE IT IN 2 PLACES, "free_function.h" AS WELL
 
 void conserve_energy_test() {

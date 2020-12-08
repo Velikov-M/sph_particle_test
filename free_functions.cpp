@@ -6,10 +6,10 @@
 #include <cmath>
 
 const double mass = 1; // mass of one particle, for now i am assuming be equal
-const double B = 0.01;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
+const double B = 6428.6;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
 const double gamma = 7.0; //mb should think more about B and rho_0;
-const double rho_0 = 0.90;
-const double mu = 8.9 * 0.01; // dynamic viscosity of water by 25C temperature
+const double rho_0 = 0.45;
+const double mu = 100; // dynamic viscosity of water by 25C temperature
 const double b = 10.0; // domain of interest
 const double g = 9.81; // gravity const
 
@@ -27,7 +27,7 @@ double ddr_weight_fun(double r, double b) {
 		return 0;
 	}
 	else {
-		return -60 * (b - r) * (b - r) * r / (M_PI * b * b);
+		return -60 * (b - r) * (b - r) * r / (M_PI * pow(b, 6));
 	}
 }
 
@@ -40,7 +40,7 @@ double calculate_distance(Particle& p1, Particle& p2) { //Probably should be rew
 double calculate_density(std::vector<Particle>& particles, int id_part, int num) {
 	double density = 0;
 	for (int j = 0; j < num; j++) {
-		density += weight_function(calculate_distance(particles[id_part], particles[j]), 2);
+		density += weight_function(calculate_distance(particles[id_part], particles[j]), b);
 	}
 	density *= mass;
 	return density;
@@ -64,13 +64,15 @@ std::vector <double> calc_grad_weight_fun(std::vector<Particle>& particles, int 
 
 std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num, bool gravity_flag) {
 	std::vector<double> acceleration = { 0, 0 }; // in this function, u should apply gravity
-	std::vector<std::vector<double>> own_pres_tensor = calc_eulier_pres_tensor(densities, id_part, num);
+	//std::vector<std::vector<double>> own_pres_tensor = calc_newton_pres_tensor(particles, densities, id_part, num);
+	std::vector<std::vector<double>> own_pres_tensor = calc_eulier_pres_tensor(densities, id_part, num); // for now let's work with Eulier tensor
 	double own_density = densities[id_part];
 	for (int j = 0; j < num; j++) {
 		if (id_part == j) {
 			continue;
 		}
-		std::vector<std::vector<double>> j_pres_tensor = calc_eulier_pres_tensor(densities, j, num);
+		//std::vector<std::vector<double>> j_pres_tensor = calc_newton_pres_tensor(particles, densities, j, num);
+		std::vector<std::vector<double>> j_pres_tensor = calc_eulier_pres_tensor(densities, j, num); // for now let's work with Eulier tensor
 		std::vector<double> ij_grad_weigh = calc_grad_weight_fun(particles, id_part, j);
 		double comp00 = (own_pres_tensor[0][0] / (own_density * own_density) + j_pres_tensor[0][0] / (densities[j] * densities[j])) * ij_grad_weigh[0];
 		double comp01 = (own_pres_tensor[0][1] / (own_density * own_density) + j_pres_tensor[0][1] / (densities[j] * densities[j])) * ij_grad_weigh[1];
@@ -79,6 +81,8 @@ std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std
 		acceleration[0] += comp00 + comp01;
 		acceleration[1] += comp10 + comp11;
 	}
+
+
 	if (gravity_flag) {
 		acceleration[1] -= g;
 	}
@@ -126,6 +130,9 @@ std::vector<std::vector<double>> calc_newton_pres_tensor(std::vector<Particle>& 
 	std::vector<std::vector<double>> pres_tensor(2);
 	std::vector<std::vector<double>> eulier_part = calc_eulier_pres_tensor(densities, id_part, num);
 	std::vector<std::vector<double>> deformations = calc_deform_tensor(particles, densities, id_part, num);
+
+	pres_tensor[0] = {0, 0};
+	pres_tensor[1] = {0, 0};
 	
 	pres_tensor[0][0] = eulier_part[0][0] + mu * deformations[0][0];
 	pres_tensor[0][1] = eulier_part[0][1] + mu * deformations[0][1];
