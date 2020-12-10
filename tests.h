@@ -8,4 +8,5 @@ void settling_down_test();
 
 void two_particle_test();
 
+void two_prt_with_viscosity_test();
 #endif

@@ -2,6 +2,6 @@
 
 
 int main() {
-	settling_down_test();
+	conserve_energy_test();
 	return 0;
 }

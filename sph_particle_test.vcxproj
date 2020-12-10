@@ -145,6 +145,7 @@
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="two_particle_test.cpp" />
+    <ClCompile Include="two_prt_with_viscosity_test.cpp" />
     <ClCompile Include="xy_work.cpp" />
     <ClCompile Include="sph_basic_tests.cpp" />
   </ItemGroup>

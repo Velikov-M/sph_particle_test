@@ -6,18 +6,20 @@
 const double h = 0.01; // timestep
 const double N_timesteps = 100;
 
-void two_particle_test() {
+void two_prt_with_viscosity_test() {
+	bool is_gravity = false;
+	bool is_viscosity = true;
 
 	std::vector<Particle> vector_of_particles;
 	int n = 2;
-	bool is_gravity = false;
-	bool is_viscosity = false;
 
-	// Let's  create two particles with coord (0, 0) and (1, 0). Initial velosities = 0
+	// Let's  create two particles with coord (0, 0) and (1, 0). Initial velosities are (0, 0) and (0, 1)
 	vector_of_particles.push_back(Particle());
 	vector_of_particles[0].set_position(0, 0);
+	vector_of_particles[0].set_velosity(0, 0);
 	vector_of_particles.push_back(Particle());
 	vector_of_particles[1].set_position(1, 0);
+	vector_of_particles[1].set_velosity(0, 1);
 
 	create_XY(vector_of_particles, n);
 
@@ -65,7 +67,4 @@ void two_particle_test() {
 		//std::cout << calc_momentum(vector_of_particles, 0, n) << std::endl;
 		add_ts_XY(vector_of_particles, n);
 	}
-
-	
-
 }

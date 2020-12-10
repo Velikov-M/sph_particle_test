@@ -8,14 +8,15 @@
 #include "free_functions.h"
 #include "xy_work.h"
 
-const double h = 0.01; // timestep
-const double N_timesteps = 500;
+const double h = 0.001; // timestep
+const double N_timesteps = 100;
 const double mass = 1.0; //wtf, i declare this const two times, IF U WANT TO CHANGE BE SURE TO MAKE IT IN 2 PLACES, "free_function.h" AS WELL
 
 void conserve_energy_test() {
+	bool is_gravity = false;
+	bool is_viscosity = false;
 	
 	std::vector<double> energies_on_steps;
-	bool is_gravity = false;
 	std::vector<Particle> vector_of_particles;
 	int n = 100;
 	for (int i = 0; i < 10; i++) {
@@ -34,7 +35,7 @@ void conserve_energy_test() {
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
 	for (int i = 0; i < n; i++) {
-		vec_of_accs[i] = calculate_acceleration(vector_of_particles, densities, i, n, is_gravity);
+		vec_of_accs[i] = calculate_acceleration(vector_of_particles, densities, i, n, is_gravity, is_viscosity);
 	}
 	std::vector < std::vector<double>> vec_of_hfvelosities(n);
 	for (int i = 0; i < n; i++) {
@@ -56,7 +57,7 @@ void conserve_energy_test() {
 			densities[j] = calculate_density(vector_of_particles, j, n);
 		}
 		for (int j = 0; j < n; j++) {
-			vec_of_accs[j] = calculate_acceleration(vector_of_particles, densities, j, n, is_gravity);
+			vec_of_accs[j] = calculate_acceleration(vector_of_particles, densities, j, n, is_gravity, is_viscosity);
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_velosity = vector_of_particles[j].get_velosity();

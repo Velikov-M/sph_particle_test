@@ -9,12 +9,13 @@
 #include "xy_work.h"
 
 // for now i'll define some global variables, in "free_function.h", mb should be rewritten
-const double h = 0.01; // timestep
-const double N_timesteps = 500;
+const double h = 0.001; // timestep
+const double N_timesteps = 2000;
 
 
 void settling_down_test() {
 	bool is_gravity = true; // we apply gravity by axe y
+	bool is_viscosity = false; //logic flag of viscosity
 
 	// we'll create 49 border particles
 	std::vector<std::vector<double>> wall_prt_coord(49);
@@ -50,7 +51,7 @@ void settling_down_test() {
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
 	for (int i = 0; i < n; i++) {
-		vec_of_accs[i] = calculate_acceleration(vector_of_particles, densities, i + 49, n + 49, is_gravity);
+		vec_of_accs[i] = calculate_acceleration(vector_of_particles, densities, i + 49, n + 49, is_gravity, is_viscosity);
 	}
 	std::vector < std::vector<double>> vec_of_hfvelosities(n);
 	for (int i = 0; i < n; i++) {
@@ -71,7 +72,7 @@ void settling_down_test() {
 			densities[j] = calculate_density(vector_of_particles, j, n + 49);
 		}
 		for (int j = 0; j < n; j++) {
-			vec_of_accs[j] = calculate_acceleration(vector_of_particles, densities, j + 49, n + 49, is_gravity);
+			vec_of_accs[j] = calculate_acceleration(vector_of_particles, densities, j + 49, n + 49, is_gravity, is_viscosity);
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_velosity = vector_of_particles[49 + j].get_velosity();
