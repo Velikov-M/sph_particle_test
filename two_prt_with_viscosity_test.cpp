@@ -9,6 +9,7 @@ const double N_timesteps = 100;
 void two_prt_with_viscosity_test() {
 	bool is_gravity = false;
 	bool is_viscosity = true;
+	bool is_friction = false;
 
 	std::vector<Particle> vector_of_particles;
 	int n = 2;
@@ -31,6 +32,7 @@ void two_prt_with_viscosity_test() {
 	std::cout << densities[1] << std::endl;
 
 	std::vector<std::vector<double>> vec_of_accs(n);
+	
 
 	vec_of_accs[0] = calculate_acceleration(vector_of_particles, densities, 0, n, is_gravity, is_viscosity);
 	vec_of_accs[1] = calculate_acceleration(vector_of_particles, densities, 1, n, is_gravity, is_viscosity);

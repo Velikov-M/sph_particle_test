@@ -8,10 +8,12 @@
 const double mass = 1; // mass of one particle, for now i am assuming be equal
 const double B = 6428.6;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
 const double gamma = 7.0; //mb should think more about B and rho_0;
-const double rho_0 = 0.28;
-const double mu = 1; // dynamic viscosity of water by 25C temperature
-const double b = 20.0; // domain of interest
-const double g = 9.81; // gravity const
+const double rho_0 = 1.0;
+//const double rho_0 = 0.0105;
+const double mu = 10.0; // dynamic viscosity
+const double b = 1.5; // domain of interest
+const double g = 9.81 * 300; // gravity const, increased for tests
+const double alpha = 0.02; //linear dissipation coefficient
 
 double weight_function(double r, double b) {
 	if (r >= b) {
@@ -62,15 +64,9 @@ std::vector <double> calc_grad_weight_fun(std::vector<Particle>& particles, int 
 	return grad_weigh;
 }
 
-std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num, bool gravity_flag, bool viscosity_flag) {
+std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<std::vector<std::vector<double>>>& pres_tensors, std::vector<double>& densities, int id_part, int num, bool gravity_flag) {
 	std::vector<double> acceleration = { 0, 0 }; // in this function, u should apply gravity
-	std::vector<std::vector<double>> own_pres_tensor;
-	if (viscosity_flag) {
-		own_pres_tensor = calc_newton_pres_tensor(particles, densities, id_part, num);
-	}
-	else {
-		own_pres_tensor = calc_eulier_pres_tensor(densities, id_part, num); // for now let's work with Eulier tensor
-	}
+	std::vector<std::vector<double>> own_pres_tensor = pres_tensors[id_part];
 	double own_density = densities[id_part];
 
 	for (int j = 0; j < num; j++) {
@@ -78,13 +74,7 @@ std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std
 			continue;
 		}
 
-		std::vector<std::vector<double>> j_pres_tensor;
-		if (viscosity_flag) {
-			j_pres_tensor = calc_newton_pres_tensor(particles, densities, j, num);
-		}
-		else {
-			j_pres_tensor = calc_eulier_pres_tensor(densities, j, num); // for now let's work with Eulier tensor
-		}
+		std::vector<std::vector<double>> j_pres_tensor = pres_tensors[j];
 		std::vector<double> ij_grad_weigh = calc_grad_weight_fun(particles, id_part, j);
 		double comp00 = (own_pres_tensor[0][0] / (own_density * own_density) + j_pres_tensor[0][0] / (densities[j] * densities[j])) * ij_grad_weigh[0];
 		double comp01 = (own_pres_tensor[0][1] / (own_density * own_density) + j_pres_tensor[0][1] / (densities[j] * densities[j])) * ij_grad_weigh[1];
@@ -94,10 +84,15 @@ std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std
 		acceleration[1] += comp10 + comp11;
 	}
 
-
 	if (gravity_flag) {
 		acceleration[1] -= g;
 	}
+
+	//if (dissipation_flag) {
+	//	std::vector<double> cur_velosity = particles[id_part].get_velosity();
+	//	acceleration[0] -= alpha * cur_velosity[0] / mass;
+	//	acceleration[1] -= alpha * cur_velosity[1] / mass;
+	//}
 	return acceleration;
 }
 
@@ -172,4 +167,9 @@ double calc_norm_of_impulse(std::vector<Particle>& particles, int start, int end
 		sum_impulse[1] += prt_velosity[1];
 	}
 	return sqrt(sum_impulse[0] * sum_impulse[0] + sum_impulse[1] * sum_impulse[1]);
+}
+
+void apply_friction(std::vector<Particle>& particles, int id_part) {
+	std::vector<double> cur_velosity = particles[id_part].get_velosity();
+	particles[id_part].set_velosity((1 - alpha) * cur_velosity[0], (1 - alpha) * cur_velosity[1]);
 }

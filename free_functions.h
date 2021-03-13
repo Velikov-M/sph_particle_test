@@ -21,7 +21,9 @@ std::vector<std::vector<double>> calc_deform_tensor(std::vector<Particle>& parti
 
 std::vector<std::vector<double>> calc_newton_pres_tensor(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num);
 
-std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num, bool gravity_flag, bool viscosity_flag);
+std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<std::vector<std::vector<double>>>& pres_tensors, std::vector<double>& densities, int id_part, int num, bool gravity_flag);
+
+void apply_friction(std::vector<Particle>& particles, int id_part);
 
 double calc_kinetic_nrg(std::vector<Particle>& particles, int start, int end);
 
