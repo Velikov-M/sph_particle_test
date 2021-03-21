@@ -45,7 +45,7 @@ void conserve_energy_test() {
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
 	for (int i = 0; i < n; i++) {
-		vec_of_accs[i] = calculate_acceleration(vector_of_particles, pres_tensors, densities, i, n, is_gravity);
+		vec_of_accs[i] = calculate_acceleration(vector_of_particles, pres_tensors, densities, i, n, 0, is_gravity);
 	}
 	std::vector < std::vector<double>> vec_of_hfvelosities(n);
 	for (int i = 0; i < n; i++) {
@@ -82,7 +82,7 @@ void conserve_energy_test() {
 			std::cout << densities[49] << std::endl;
 		}
 		for (int j = 0; j < n; j++) {
-			vec_of_accs[j] = calculate_acceleration(vector_of_particles, pres_tensors, densities, j, n, is_gravity);
+			vec_of_accs[j] = calculate_acceleration(vector_of_particles, pres_tensors, densities, j, n, 0, is_gravity);
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_velosity = vector_of_particles[j].get_velosity();

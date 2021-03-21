@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <sstream>
 #include "Particle.h"
 
 void create_XY(std::vector<Particle>& particles, int num) {
@@ -31,4 +33,25 @@ void add_ts_XY(std::vector<Particle>& particles, int num) {
 	}
 	finput.close();
 	foutput.close();
+}
+
+int read_initial_position(std::vector<Particle>& particles,int n) {
+	std::ifstream finput;
+	finput.open("initial_prt_pos.xyz");
+	std::string line;
+	int i = 0; //we have to know how many prts we read already
+	while (std::getline(finput, line)) {
+		particles.push_back(Particle());
+		std::stringstream lineStream(line);
+		std::string cell;
+		std::getline(lineStream, cell, ' ');
+		std::getline(lineStream, cell, ' ');
+		double x_prt = stod(cell);
+		std::getline(lineStream, cell, ' ');
+		double y_prt = stod(cell);
+		particles[n + i].set_position(x_prt, y_prt);
+		i++;
+	}
+	finput.close();
+	return i;
 }

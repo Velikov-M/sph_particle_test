@@ -2,6 +2,6 @@
 
 
 int main() {
-	settling_down_test();
+	droping_test();
 	return 0;
 }

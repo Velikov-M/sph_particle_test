@@ -62,7 +62,7 @@ void settling_down_test() {
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
 	for (int i = 0; i < n; i++) {
-		vec_of_accs[i] = calculate_acceleration(vector_of_particles, pres_tensors, densities, i + counter, n + counter, is_gravity);
+		vec_of_accs[i] = calculate_acceleration(vector_of_particles, pres_tensors, densities, i + counter, n + counter, 0, is_gravity);
 	}
 	std::vector < std::vector<double>> vec_of_hfvelosities(n);
 	for (int i = 0; i < n; i++) {
@@ -85,6 +85,9 @@ void settling_down_test() {
 		for (int j = 0; j < n + counter; j++) {
 			densities[j] = calculate_density(vector_of_particles, j, n + counter);
 		}
+		if (i % 500 == 0) {
+			std::cout << densities[49] << std::endl;
+		}
 		for (int j = 0; j < n + counter; j++) {
 			if (is_viscosity) {
 				pres_tensors[j] = calc_newton_pres_tensor(vector_of_particles, densities, j, n + counter);
@@ -94,7 +97,7 @@ void settling_down_test() {
 			}
 		}
 		for (int j = 0; j < n; j++) {
-			vec_of_accs[j] = calculate_acceleration(vector_of_particles, pres_tensors, densities, j + counter, n + counter, is_gravity);
+			vec_of_accs[j] = calculate_acceleration(vector_of_particles, pres_tensors, densities, j + counter, n + counter, 0, is_gravity);
 		}
 		for (int j = 0; j < n; j++) {
 			std::vector<double> prev_velosity = vector_of_particles[counter + j].get_velosity();

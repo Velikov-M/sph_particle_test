@@ -6,7 +6,7 @@
 #include <cmath>
 
 const double mass = 1; // mass of one particle, for now i am assuming be equal
-const double B = 6428.6;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005)
+const double B = 6428.6;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005) 6428.6
 const double gamma = 7.0; //mb should think more about B and rho_0;
 const double rho_0 = 1.0;
 //const double rho_0 = 0.0105;
@@ -14,6 +14,19 @@ const double mu = 10.0; // dynamic viscosity
 const double b = 1.5; // domain of interest
 const double g = 9.81 * 300; // gravity const, increased for tests
 const double alpha = 0.02; //linear dissipation coefficient
+const double Ene_bond = 2.0; // next 2 global vars ara parametrs for Leonard-Jones potential (interaction water-stone)
+const double a_bond = 1.5;
+const double mass_stone = 10.0; // kg
+const double moment_inertia_stone = 80.0; // kg * m ^ 2
+
+double force_by_Lennard_Jones(double r, double Ene_bond, double a_bond) {
+	if (r >= a_bond) {
+		return 0;
+	}
+	else {
+		return -12.0 * Ene_bond / a_bond * (-pow(a_bond / r, 13) + pow(a_bond / r, 7));
+	}
+}
 
 double weight_function(double r, double b) {
 	if (r >= b) {
@@ -31,6 +44,27 @@ double ddr_weight_fun(double r, double b) {
 	else {
 		return -60 * (b - r) * (b - r) * r / (M_PI * pow(b, 6));
 	}
+}
+
+std::vector<double> calc_stone_accs(std::vector<Particle>& particles, std::vector<double> stone_pos, int n_exterior, int n_stone, bool gravity_flag) { //this function calculate all 3 scalar accs, as they're connected
+	std::vector <double> stone_acc = { 0 , 0, 0}; // x[0]'', x[1]'', \phi''
+	for (int i = 0; i < n_stone; i++) {
+		std::vector<double> r = { particles[n_exterior + i].get_position()[0] - stone_pos[0], particles[n_exterior + i].get_position()[1] - stone_pos[1] };
+		for (int j = 0; j < n_exterior; j++) {
+			double distance = calculate_distance(particles[n_exterior + i], particles[j]);
+			double force_ij = force_by_Lennard_Jones(distance, Ene_bond, a_bond);
+			double force_x0 = force_ij * (particles[n_exterior + i].get_position()[0] - particles[j].get_position()[0]) / distance;
+			double force_x1 = force_ij * (particles[n_exterior + i].get_position()[1] - particles[j].get_position()[1]) / distance;
+			double momentum = r[0] * force_x1 - r[1] * force_x0;
+			stone_acc[0] += force_x0 / mass_stone;
+			stone_acc[1] += force_x1 / mass_stone;
+			stone_acc[2] += momentum / moment_inertia_stone;
+		}
+	}
+	if (gravity_flag) {
+		stone_acc[1] -= g;
+	}
+	return stone_acc;
 }
 
 double calculate_distance(Particle& p1, Particle& p2) { //Probably should be rewritten without calling get_position() for every between-two-particle distance.
@@ -64,11 +98,11 @@ std::vector <double> calc_grad_weight_fun(std::vector<Particle>& particles, int 
 	return grad_weigh;
 }
 
-std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<std::vector<std::vector<double>>>& pres_tensors, std::vector<double>& densities, int id_part, int num, bool gravity_flag) {
+std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std::vector<std::vector<std::vector<double>>>& pres_tensors, std::vector<double>& densities, int id_part, int num, int num_stone, bool gravity_flag) {
 	std::vector<double> acceleration = { 0, 0 }; // in this function, u should apply gravity
 	std::vector<std::vector<double>> own_pres_tensor = pres_tensors[id_part];
 	double own_density = densities[id_part];
-
+	// fluid-fluid interaction part
 	for (int j = 0; j < num; j++) {
 		if (id_part == j) {
 			continue;
@@ -82,6 +116,13 @@ std::vector<double> calculate_acceleration(std::vector<Particle>& particles, std
 		double comp11 = (own_pres_tensor[1][1] / (own_density * own_density) + j_pres_tensor[1][1] / (densities[j] * densities[j])) * ij_grad_weigh[1];
 		acceleration[0] += comp00 + comp01;
 		acceleration[1] += comp10 + comp11;
+	}
+	// fluid-stone interaction part
+	for (int j = 0; j < num_stone; j++) {
+		double distance = calculate_distance(particles[id_part], particles[j + num]);
+		double force_ij = force_by_Lennard_Jones(distance, Ene_bond, a_bond);
+		acceleration[0] += force_ij * (particles[id_part].get_position()[0] - particles[j + num].get_position()[0]) / distance;
+		acceleration[1] += force_ij * (particles[id_part].get_position()[1] - particles[j + num].get_position()[1]) / distance;
 	}
 
 	if (gravity_flag) {
