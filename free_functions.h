@@ -7,13 +7,19 @@
 
 double weight_function(double r, double b);
 
+double force_by_Lennard_Jones(double r, double Ene_bond, double a_bond);
+
 double ddr_weight_fun(double r, double b);
 
 double calculate_distance(Particle& p1, Particle& p2);
 
 double calculate_density(std::vector<Particle>& particles, int id_part, int num);
 
-std::vector<std::vector<double>> calc_eulier_pres_tensor(std::vector<double>& densities, int id_part, int num);
+std::vector<std::vector<std::vector<int>>> create_cells(std::vector<Particle>& particles, double x_start, double x_end, double y_start, double y_end, int n);
+
+void refresh_cells(std::vector<Particle>& particles, std::vector<std::vector<std::vector<int>>>& cells, double x_start, double y_start, int i_start, int i_end);
+
+std::vector<std::vector<double>> calc_eulier_pres_tensor(std::vector<double>& densities, int id_part);
 
 std::vector <double> calc_grad_weight_fun(std::vector<Particle>& particles, int id_part, int j_part);
 

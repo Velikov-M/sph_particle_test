@@ -44,7 +44,7 @@ void droping_test() {
 	int n_stone = 40;
 	double a = 4.0;
 	double b = 1.0;
-	std::vector<double> stone_pos = { 0, 11, 0}; //initialising stone coordinates and it's derivatives (stone modeled as solid in 2D, therefore 3 kinematic coordinates (2 translational, 1 rotational))
+	std::vector<double> stone_pos = { 15, 11, 0}; //initialising stone coordinates and it's derivatives (stone modeled as solid in 2D, therefore 3 kinematic coordinates (2 translational, 1 rotational))
 	std::vector<double> stone_vel = { 0, 0, 0};
 	std::vector<std::vector<double>> initial_r_stone(n_stone);
 	for (int i = 0; i < n_stone; i++) {
@@ -68,7 +68,7 @@ void droping_test() {
 			pres_tensors[i] = calc_newton_pres_tensor(vector_of_particles, densities, i, n_free_prt + counter);
 		}
 		else {
-			pres_tensors[i] = calc_eulier_pres_tensor(densities, i, n_free_prt + counter);
+			pres_tensors[i] = calc_eulier_pres_tensor(densities, i);
 		}
 	}
 
@@ -129,7 +129,7 @@ void droping_test() {
 				pres_tensors[j] = calc_newton_pres_tensor(vector_of_particles, densities, j, counter + n_free_prt);
 			}
 			else {
-				pres_tensors[j] = calc_eulier_pres_tensor(densities, j, counter + n_free_prt);
+				pres_tensors[j] = calc_eulier_pres_tensor(densities, j);
 			}
 		}
 		if (i % 500 == 0) {

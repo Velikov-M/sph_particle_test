@@ -6,9 +6,9 @@ void conserve_energy_test();
 
 void settling_down_test();
 
-void two_particle_test();
-
-void two_prt_with_viscosity_test();
-
 void droping_test();
+
+void set_down_with_cells();
+
+void throw_a_stone();
 #endif

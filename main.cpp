@@ -2,6 +2,6 @@
 
 
 int main() {
-	droping_test();
+	set_down_with_cells();
 	return 0;
 }

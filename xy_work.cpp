@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cstring>
 #include "Particle.h"
 
 void create_XY(std::vector<Particle>& particles, int num) {
@@ -11,7 +12,7 @@ void create_XY(std::vector<Particle>& particles, int num) {
 	xyz_file << std::endl;
 	for (int i = 0; i < num; i++) {
 		std::vector<double> cur_pos = particles[i].get_position();
-		xyz_file << "P  " << cur_pos[0] << "  " << cur_pos[1] << std::endl;
+		xyz_file << particles[i].get_type() << "  " << cur_pos[0] << "  " << cur_pos[1] << std::endl;
 	}
 	xyz_file.close();
 }
@@ -28,7 +29,7 @@ void add_ts_XY(std::vector<Particle>& particles, int num) {
 		foutput << std::endl;
 		for (int i = 0; i < num; i++) {
 			std::vector<double> cur_pos = particles[i].get_position();
-			foutput << "P  " << cur_pos[0] << "  " << cur_pos[1] << std::endl;
+			foutput << particles[i].get_type() << "  " << cur_pos[0] << "  " << cur_pos[1] << std::endl;
 		}
 	}
 	finput.close();
@@ -45,11 +46,16 @@ int read_initial_position(std::vector<Particle>& particles,int n) {
 		std::stringstream lineStream(line);
 		std::string cell;
 		std::getline(lineStream, cell, ' ');
+//		char tmp_char_array[1];
+//		strcpy_s(tmp_char_array, cell.c_str());
+//		char prt_type = tmp_char_array[1];
 		std::getline(lineStream, cell, ' ');
 		double x_prt = stod(cell);
 		std::getline(lineStream, cell, ' ');
 		double y_prt = stod(cell);
 		particles[n + i].set_position(x_prt, y_prt);
+//		particles[n + i].set_type(prt_type);
+		particles[n + i].set_type('P');
 		i++;
 	}
 	finput.close();

@@ -23,3 +23,11 @@ void Particle::print_position() {
 void Particle::print_velosity() {
 	std::cout << "(" << velosity[0] << ", " << velosity[1] << ")" << std::endl;
 };
+
+void Particle::set_type(char c) { // 'P' is for particle, 'W' is wall particle, 'S' is stone particle
+	type = c;
+}
+
+void Particle::set_cell_id(std::vector<int> id) {
+	cell_id = id;
+}

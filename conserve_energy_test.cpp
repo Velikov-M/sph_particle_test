@@ -40,7 +40,7 @@ void conserve_energy_test() {
 			pres_tensors[i] = calc_newton_pres_tensor(vector_of_particles, densities, i, n);
 		}
 		else {
-			pres_tensors[i] = calc_eulier_pres_tensor(densities, i, n);
+			pres_tensors[i] = calc_eulier_pres_tensor(densities, i);
 		}
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
@@ -75,7 +75,7 @@ void conserve_energy_test() {
 				pres_tensors[j] = calc_newton_pres_tensor(vector_of_particles, densities, j, n);
 			}
 			else {
-				pres_tensors[j] = calc_eulier_pres_tensor(densities, j, n);
+				pres_tensors[j] = calc_eulier_pres_tensor(densities, j);
 			}
 		}
 		if (i % 500 == 0) {

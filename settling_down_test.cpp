@@ -24,16 +24,19 @@ void settling_down_test() {
 	for (int i = 0; i < 18; i++) {
 		vector_of_particles.push_back(Particle());
 		vector_of_particles[counter].set_position( -15.0, 9.0 - i / 2. );
+		vector_of_particles[counter].set_type('W');
 		counter++;
 	}
 	for (int i = 0; i < 61; i++) {
 		vector_of_particles.push_back(Particle());
 		vector_of_particles[counter].set_position(-15.0 + i / 2., 0.0 );
+		vector_of_particles[counter].set_type('W');
 		counter++;
 	}
 	for (int i = 0; i < 18; i++) {
 		vector_of_particles.push_back(Particle());
 		vector_of_particles[counter].set_position( 15.0, .5 + i / 2. );
+		vector_of_particles[counter].set_type('W');
 		counter++;
 	}
 
@@ -43,6 +46,7 @@ void settling_down_test() {
 		for (int j = 0; j < 10; j++) {
 			vector_of_particles.push_back(Particle());
 			vector_of_particles[counter + 10 * i + j].set_position(-4.5 + j, 10.5 - i);
+			vector_of_particles[counter + 10 * i + j].set_type('P');
 		}
 	}
 	std::vector<double> densities(n + counter);
@@ -57,7 +61,7 @@ void settling_down_test() {
 			pres_tensors[i] = calc_newton_pres_tensor(vector_of_particles, densities, i, n + counter);
 		}
 		else {
-			pres_tensors[i] = calc_eulier_pres_tensor(densities, i, n + counter);
+			pres_tensors[i] = calc_eulier_pres_tensor(densities, i);
 		}
 	}
 	std::vector<std::vector<double>> vec_of_accs(n);
@@ -93,7 +97,7 @@ void settling_down_test() {
 				pres_tensors[j] = calc_newton_pres_tensor(vector_of_particles, densities, j, n + counter);
 			}
 			else {
-				pres_tensors[j] = calc_eulier_pres_tensor(densities, j, n + counter);
+				pres_tensors[j] = calc_eulier_pres_tensor(densities, j);
 			}
 		}
 		for (int j = 0; j < n; j++) {

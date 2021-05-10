@@ -2,22 +2,12 @@
 
 #include "free_functions.h"
 #include "Particle.h"
+#include "Global_consts.h"
 #include <math.h>
 #include <cmath>
+#include <iostream> 
+#include <stdexcept>
 
-const double mass = 1; // mass of one particle, for now i am assuming be equal
-const double B = 6428.6;  // next 3 global vars are consts in equation of state for liquid (Cole form, see Monaghan, SPH, 2005) 6428.6
-const double gamma = 7.0; //mb should think more about B and rho_0;
-const double rho_0 = 1.0;
-//const double rho_0 = 0.0105;
-const double mu = 10.0; // dynamic viscosity
-const double b = 1.5; // domain of interest
-const double g = 9.81 * 300; // gravity const, increased for tests
-const double alpha = 0.02; //linear dissipation coefficient
-const double Ene_bond = 2.0; // next 2 global vars ara parametrs for Leonard-Jones potential (interaction water-stone)
-const double a_bond = 1.5;
-const double mass_stone = 10.0; // kg
-const double moment_inertia_stone = 80.0; // kg * m ^ 2
 
 double force_by_Lennard_Jones(double r, double Ene_bond, double a_bond) {
 	if (r >= a_bond) {
@@ -47,7 +37,7 @@ double ddr_weight_fun(double r, double b) {
 }
 
 std::vector<double> calc_stone_accs(std::vector<Particle>& particles, std::vector<double> stone_pos, int n_exterior, int n_stone, bool gravity_flag) { //this function calculate all 3 scalar accs, as they're connected
-	std::vector <double> stone_acc = { 0 , 0, 0}; // x[0]'', x[1]'', \phi''
+	std::vector <double> stone_acc = { 0, 0, 0}; // x[0]'', x[1]'', \phi''
 	for (int i = 0; i < n_stone; i++) {
 		std::vector<double> r = { particles[n_exterior + i].get_position()[0] - stone_pos[0], particles[n_exterior + i].get_position()[1] - stone_pos[1] };
 		for (int j = 0; j < n_exterior; j++) {
@@ -67,7 +57,37 @@ std::vector<double> calc_stone_accs(std::vector<Particle>& particles, std::vecto
 	return stone_acc;
 }
 
-double calculate_distance(Particle& p1, Particle& p2) { //Probably should be rewritten without calling get_position() for every between-two-particle distance.
+std::vector<std::vector<std::vector<int>>> create_cells(std::vector<Particle>& particles, double x_start, double x_end, double y_start, double y_end, int n) {
+	int steps_x = int((x_end - x_start) / b);
+	int steps_y = int((y_end - y_start) / b);
+	std::vector<std::vector<std::vector<int>>> cells(steps_x);
+	for (int i = 0; i < steps_x; i++) {
+		std::vector<std::vector<int>> tmp(steps_y);
+		cells[i] = tmp;
+	}
+	refresh_cells(particles, cells, x_start, y_start, 0, n);
+	return cells;
+}
+
+void refresh_cells(std::vector<Particle>& particles, std::vector<std::vector<std::vector<int>>>& cells, double x_start, double y_start, int i_start, int i_end) {
+	for (int i = i_start; i < i_end; i++) {
+		//std::cout << i << std::endl;
+		std::vector<double> prt_pos = particles[i].get_position();
+		int x_num_of_cell = int((prt_pos[0] - x_start) / b);
+		int y_num_of_cell = int((prt_pos[1] - y_start) / b);
+		try {
+			cells.at(x_num_of_cell).at(y_num_of_cell).push_back(i);
+			particles[i].set_cell_id({ x_num_of_cell, y_num_of_cell });
+		}
+		catch (const std::out_of_range& e) {
+			//cells.at(x_num_of_cell - 1).at(y_num_of_cell).push_back(i); //there happen mistake with y_prt < 0 (particle clipped through wall)
+			//particles[i].set_cell_id({ x_num_of_cell - 1, y_num_of_cell });
+			//std::cout << "Out of Range error in particle id=" << i <<std::endl;
+		}
+	}
+}
+
+double calculate_distance(Particle& p1, Particle& p2) {
 	std::vector<double> r1 = p1.get_position();
 	std::vector<double> r2 = p2.get_position();
 	return sqrt((r1[0] - r2[0]) * (r1[0] - r2[0]) + (r1[1] - r2[1]) * (r1[1] - r2[1]));
@@ -82,7 +102,7 @@ double calculate_density(std::vector<Particle>& particles, int id_part, int num)
 	return density;
 }
 
-std::vector<std::vector<double>> calc_eulier_pres_tensor(std::vector<double>& densities, int id_part, int num) {
+std::vector<std::vector<double>> calc_eulier_pres_tensor(std::vector<double>& densities, int id_part) {
 	std::vector < std::vector<double>> pres_tensor(2);
 	double pressure = B * (pow(densities[id_part] / rho_0, gamma) - 1);
 	pres_tensor[0] = { -pressure, 0 };
@@ -147,7 +167,7 @@ double calc_kinetic_nrg(std::vector<Particle>& particles, int start, int end) { 
 	return sum_nrg;
 }
 
-std::vector<std::vector<double>> calc_deform_tensor(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num) {
+std::vector<std::vector<double>> calc_deform_tensor(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num) { //actually it's velocities of deformations
 	std::vector < std::vector<double>> deform_tensor(2);
 	deform_tensor[0] = { 0, 0 };
 	deform_tensor[1] = { 0, 0 };
@@ -176,7 +196,7 @@ std::vector<std::vector<double>> calc_deform_tensor(std::vector<Particle>& parti
 
 std::vector<std::vector<double>> calc_newton_pres_tensor(std::vector<Particle>& particles, std::vector<double>& densities, int id_part, int num) {
 	std::vector<std::vector<double>> pres_tensor(2);
-	std::vector<std::vector<double>> eulier_part = calc_eulier_pres_tensor(densities, id_part, num);
+	std::vector<std::vector<double>> eulier_part = calc_eulier_pres_tensor(densities, id_part);
 	std::vector<std::vector<double>> deformations = calc_deform_tensor(particles, densities, id_part, num);
 
 	pres_tensor[0] = {0, 0};
